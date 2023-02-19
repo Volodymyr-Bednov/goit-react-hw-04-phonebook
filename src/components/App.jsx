@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Section } from './Section/Section';
 import { FormContact } from './FormContact/FormContact';
 import { ListContacts } from './ListContacts/ListContacts';
@@ -6,81 +6,84 @@ import { Firter } from './Filter/Filter';
 import { nanoid } from 'nanoid';
 import css from './App.module.css';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
 
-  componentDidMount() {
-    if (localStorage.getItem('contacts')) {
-      this.setState({ contacts: JSON.parse(localStorage.getItem('contacts')) });
-    }
-  }
+export const App =()=>{
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
 
-  componentDidUpdate(prevProps, prevState) {
-    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-  }
+  useEffect(()=>{
 
-  addContactHandler = evt => {
+if (!localStorage.getItem('contacts')) {
+  localStorage.setItem('contacts', JSON.stringify(contacts));
+}  
+if (!!JSON.parse(localStorage.getItem('contacts')).length) {
+  setContacts([...JSON.parse(localStorage.getItem("contacts"))]);
+}
+}, [])
+
+useEffect(()=>{
+   localStorage.setItem('contacts', JSON.stringify(contacts));
+}, [contacts])
+
+
+
+  const addContactHandler = (evt) => {
     evt.preventDefault();
     const { name, number } = evt.target.elements;
     const nameValue = name.value;
     const numbervalue = number.value;
-    const nameMatch = this.state.contacts.filter(item =>
+    if (!nameValue || !numbervalue) return;
+    if (contacts) {
+        const nameMatch = contacts.filter(item =>
       item.name.toLowerCase().includes(nameValue.toLowerCase())
     );
-    if (nameMatch.length) return alert(`${nameValue} is already in contacts`);
-    this.setState(list => {
-      return {
-        contacts: [
-          ...list.contacts,
-          { id: nanoid(), name: nameValue, number: numbervalue },
-        ],
-      };
-    });
-    this.clearFields(evt.target.elements);
+
+       if (nameMatch.length) return alert(`${nameValue} is already in contacts`);
+    }
+    setContacts([...contacts, { id: nanoid(), name: nameValue, number: numbervalue }])
+    evt.target.reset()
   };
 
-  clearFields = evt => {
-    evt.name.value = '';
-    evt.number.value = '';
-  };
-  deleteContactHandler = evt => {
-    console.dir(evt.target.dataset.id);
-    this.setState(({ contacts }) => {
-      return {
-        contacts: contacts.filter(item => item.id !== evt.target.dataset.id),
-      };
-    });
+  const filterChahge = evt => {
+    setFilter(evt.target.value)
   };
 
-  filterChahge = evt => {
-    this.setState({ filter: evt.target.value });
-  };
 
-  render() {
-    const { filter, contacts } = this.state;
-    const formatedtext = filter.toLowerCase();
-    const filteredData = contacts.filter(item =>
-      item.name.toLowerCase().includes(formatedtext)
-    );
-    return (
-      <div className={css.wrap}>
+  useEffect(()=>{
+    const filterFormatedText = filter.toLowerCase();
+
+    const filterData = contacts.filter(item => item.name.toLowerCase().includes(filterFormatedText));
+    setFilteredData(filterData)
+
+  },[filter, contacts])
+
+    const deleteContactHandler = evt => {
+      setContacts(contacts.filter(item => item.id !== evt.target.dataset.id))
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+  };
+  
+  return(
+          <div className={css.wrap}>
         <Section
-          title={'Phoneboock'}
+          title={'Phonebook'}
           children={
-            <FormContact onAddContactHandler={this.addContactHandler} />
+            <FormContact
+              onAddContactHandler={addContactHandler}
+              />
           }
         />
         <Section title={'Contacts'}>
-          <Firter onFilterChahge={this.filterChahge} valueFilter={filter} />
-          <ListContacts
+          <Firter 
+           onFilterChahge={filterChahge}
+            valueFilter={filter} 
+          />
+           <ListContacts
             dataList={filteredData}
-            onDeleteContactHandler={this.deleteContactHandler}
+            // dataList={filteredData}
+             onDeleteContactHandler={deleteContactHandler}
           />
         </Section>
       </div>
-    );
-  }
+  )
 }

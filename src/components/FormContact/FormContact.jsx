@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import css from './FormContact.module.css';
-export const FormContact = ({ name, onAddContactHandler }) => {
-  //console.log(onAddContactHandler);
+export const FormContact = ({ onAddContactHandler }) => {
   return (
     <form className={css.form} onSubmit={onAddContactHandler}>
       <label className={css.labelInput} htmlFor="name">
