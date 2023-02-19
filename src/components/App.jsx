@@ -13,14 +13,24 @@ export const App =()=>{
   const [filteredData, setFilteredData] = useState([]);
 
   useEffect(()=>{
-
-if (!localStorage.getItem('contacts')) {
-  localStorage.setItem('contacts', JSON.stringify(contacts));
-}  
-if (!!JSON.parse(localStorage.getItem('contacts')).length) {
-  setContacts([...JSON.parse(localStorage.getItem("contacts"))]);
-}
+    startDidMount ();
+// if (!localStorage.getItem('contacts')) {
+//   localStorage.setItem('contacts', JSON.stringify(contacts));
+// }  
+// if (!!JSON.parse(localStorage.getItem('contacts')).length) {
+//   setContacts([...JSON.parse(localStorage.getItem("contacts"))]);
+// }
+// eslint-disable-next-line react-hooks/exhaustive-deps
 }, [])
+
+const startDidMount = () =>{
+  if (!localStorage.getItem('contacts')) {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }  
+  if (!!JSON.parse(localStorage.getItem('contacts')).length) {
+    setContacts([...JSON.parse(localStorage.getItem("contacts"))]);
+  }
+}
 
 useEffect(()=>{
    localStorage.setItem('contacts', JSON.stringify(contacts));
